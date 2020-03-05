@@ -29,7 +29,7 @@
 #include <Eigen/Eigenvalues>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 using namespace Eigen;
 using namespace Sophus;
 #include <opencv2/opencv.hpp>
@@ -47,19 +47,22 @@ using namespace cv;
 using namespace std;
 using namespace cv;
 
-float K[3][3] = { 481.20,   0,  319.50,
-					0,  -480.00,  239.50,
-					0,        0,    1.00 };
+// float K[3][3] = { 481.20,   0,  319.50,
+// 					0,  -480.00,  239.50,
+// 					0,        0,    1.00 };
+float K[3][3] = { 4.621387023925781250e+02,   0.000000000000000000e+00,  3.200000000000000000e+02,
+				0,  5.199060668945312500e+02,  2.400000000000000000e+02,
+				0,        0,    1.00 };
 
-string getImageFileName( const string& path_name_, int ref_image_no, int which_blur){
-	char imageFileName[300];
-	sprintf(imageFileName,"%s\\scene_%02d_%04d.png",path_name_.c_str(),which_blur,ref_image_no);
-	string fileName(imageFileName);
-	return fileName;
-}
+// string getImageFileName( const string& path_name_, int ref_image_no, int which_blur){
+// 	char imageFileName[300];
+// 	sprintf(imageFileName,"%s/scene_%02d_%04d.png",path_name_.c_str(),which_blur,ref_image_no);
+// 	string fileName(imageFileName);
+// 	return fileName;
+// }
 string getDepthFileName( const string& path_name_, int ref_image_no, int which_blur){
 	char imageFileName[300];
-	sprintf(imageFileName,"%s\\scene_%02d_%04d.depth.png",path_name_.c_str(),which_blur,ref_image_no);
+	sprintf(imageFileName,"%s/scene_%02d_%04d.depth.png",path_name_.c_str(),which_blur,ref_image_no);
 	string fileName(imageFileName);
 	return fileName;
 }
@@ -89,15 +92,15 @@ void printNormalImage(const GpuMat& depth_gpu, string& name_){
 	imwrite(name_.c_str(),normal_image);
 }
 
-boost::shared_ptr<ifstream> _pInputFile;
+//boost::shared_ptr<ifstream> _pInputFile;
 int idx;
-vector<SE3Group<double>> _v_T_wc;
+//vector<SE3Group<double>> _v_T_wc;
 
 int main(int argc, char** argv)
 {
 	// edit the following line to specify input folders and output folders
-	string input_path_name ("..\\icl\\noise_lvl_0\\living_room_traj0_loop\\");
-	string output_path_name("..\\icl\\noise_lvl_1\\living_room_traj0_loop\\");
+	string input_path_name ("../data/in/");
+	string output_path_name("../data/out/");
 	const int nTotal = init(input_path_name);
     cout<<"Number of text files = " << nTotal << endl;
 
@@ -124,32 +127,13 @@ int main(int argc, char** argv)
 	
 	for (int img_no=0; img_no< nTotal; img_no++)
 	{
-		// add image noise
-		if(false){
-			string imgName = getImageFileName( input_path_name, img_no, 0 );
-
-			Mat image = imread(imgName.c_str());
-			GpuMat gpu_image; gpu_image.upload(image);
-			GpuMat gpu_image_float; gpu_image.convertTo(gpu_image_float,CV_32FC3);
-			GpuMat gpu_noisy_image_float = gpu_image_float.clone();
-
-			launch_add_camera_noise((float3*)gpu_image_float.data, (float3*)gpu_noisy_image_float.data, sigma_s, sigma_c, gpu_image_float.cols, gpu_image_float.rows, 255.f );
-
-			GpuMat gpu_noisy_image;
-			gpu_noisy_image_float.convertTo( gpu_noisy_image, CV_8UC3, 255.f );
-			gpu_noisy_image.download( noisy_image );
-			string out_imgName = getImageFileName( output_path_name, img_no, 0 );
-			imwrite( out_imgName.c_str(), noisy_image );
-		}
-
-		//add depth noise
-		//dataset.getEuclidean2PlanarDepth( img_no, 0, (float*)depth_float.data );
 
 		string depName = getDepthFileName( input_path_name, img_no, 0 );
 		depth = imread( depName.c_str(), IMREAD_UNCHANGED );
 		depth_gpu.upload( depth );
 		depth_gpu.convertTo( depth_float_gpu, CV_32FC1, 1/1000.f );
-		//printNormalImage(depth_float_gpu,string("ni_1.png"));
+		string ni_1 = "../data/out/ni_1.png";
+		printNormalImage(depth_float_gpu, ni_1);
 
 		//1. 
 		convertDepth2Verts( depth_float_gpu, &vertex_gpu, make_float2(K[0][2],K[1][2]), make_float2(K[0][0],K[1][1]) );
@@ -164,16 +148,19 @@ int main(int argc, char** argv)
 		//convert vertex to depth
 		depth_float_gpu.setTo(0.f);
 		convertVerts2Depth( &noisy_vertex_gpu, &depth_float_gpu, make_float2(K[0][2],K[1][2]), make_float2(K[0][0],K[1][1]) );
-		//printNormalImage(depth_float_gpu,string("ni_2.png"));
+		string ni_2 = "../data/out/ni_2.png";
+		printNormalImage(depth_float_gpu, ni_2);
 
 		//2. 
 		gaussian_shifts( (float2*)gaussian_2d_shift_gpu.data, gaussian_2d_shift_gpu.cols, gaussian_2d_shift_gpu.rows, 3.f );
 		add_gaussian_shifts( depth_float_gpu, gaussian_2d_shift_gpu, &depth_shifted_gpu );
-		//printNormalImage( depth_shifted_gpu, string("ni_3.png") );
+		string ni_3 = "../data/out/ni_3.png";
+		printNormalImage( depth_shifted_gpu, ni_3);
 		
 		//3.
 		add_depth_noise_barronCVPR2013( (float*)depth_shifted_gpu.data, depth_shifted_gpu.cols, depth_shifted_gpu.rows );
-		//printNormalImage( depth_shifted_gpu, string("ni_4.png") );
+		string ni_4 = "../data/out/ni_4.png";
+		printNormalImage( depth_shifted_gpu, ni_4);
 
 		//convert depth from metre to 1000 mm 
 		depth_shifted_gpu.convertTo( depth_gpu, CV_16UC1, 1000 );
