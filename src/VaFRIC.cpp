@@ -21,7 +21,6 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
  * OTHER DEALINGS IN THE SOFTWARE.
  */
-//eigen
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <Eigen/Eigenvalues>
@@ -40,8 +39,6 @@ using namespace cv;
 #include <boost/random/variate_generator.hpp>
 
 #define LIVINGROOM
-
-//using namespace boost;
 
 namespace dataset
 {
@@ -87,7 +84,6 @@ Matrix4f vaFRIC::computeTpov_cam(int ref_img_no, int which_blur_sample)
             iss.ignore(1, ',');
             iss >> direction(2);
             iss.ignore(1, ',');
-            //cout << direction.x<< ", "<< direction.y << ", "<< direction.z << endl;
         }
 
         if (strstr(readlinedata, "cam_up") != NULL)
@@ -124,24 +120,14 @@ Matrix4f vaFRIC::computeTpov_cam(int ref_img_no, int which_blur_sample)
         }
     }
 
-    /// z = dir / norm(dir)
     Vector3f z = direction;
     z.normalize();
 
-    /// x = cross(cam_up, z)
     Vector3f x(0, 0, 0);
     x = upvector.cross(z);
-    //x[0] =  upvector.y * z[2] - upvector.z * z[1];
-    //x[1] =  upvector.z * z[0] - upvector.x * z[2];
-    //x[2] =  upvector.x * z[1] - upvector.y * z[0];
-
     x.normalize();
 
-    /// y = cross(z,x)
     Vector3f y = z.cross(x);
-    //y[0] =  z[1] * x[2] - z[2] * x[1];
-    //y[1] =  z[2] * x[0] - z[0] * x[2];
-    //y[2] =  z[0] * x[1] - z[1] * x[0];
 
     Matrix3f R;
     R.col(0) = x;

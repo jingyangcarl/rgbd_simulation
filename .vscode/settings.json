@@ -1,6 +1,18 @@
 {
     "files.associations": {
-        "*.cuh": "cpp"
+        "*.cuh": "cpp",
+        "*.tcc": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "unordered_map": "cpp",
+        "ios": "cpp",
+        "locale": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "geometry": "cpp",
+        "filesystem": "cpp"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

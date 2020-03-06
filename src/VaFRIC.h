@@ -27,17 +27,11 @@
 
 #include <iostream>
 #include <string>
-//#include<TooN/se3.h>
 
 #include <fstream>
 #include <sstream>
 #include <stdlib.h>
-//#include <TooN/TooN.h>
-//#include <TooN/se3.h>
 #include <cstring>
-//#include <dirent.h>
-//#include <cvd/image.h>
-//#include <cvd/image_io.h>
 
 #include <vector>
 #include "boost/random.hpp"

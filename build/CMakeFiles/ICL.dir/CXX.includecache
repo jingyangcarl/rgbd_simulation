@@ -59,6 +59,10 @@ iostream
 -
 stdio.h
 -
+string
+-
+regex
+-
 Eigen/Eigenvalues
 -
 Eigen/Core
@@ -72,6 +76,8 @@ opencv2/opencv.hpp
 opencv2/cudaarithm.hpp
 -
 opencv2/core/cuda/common.hpp
+-
+boost/regex.hpp
 -
 VaFRIC.h
 /home/ICT2000/jyang/Documents/Project/rgbd_simulation/src/VaFRIC.h
