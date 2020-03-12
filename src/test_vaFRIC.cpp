@@ -113,8 +113,10 @@ int main(int argc, char **argv)
 	int width = 1280;
 
 	// edit the following line to specify input folders and output folders
-	string rootpath_in("../data/in/");
-	string rootpath_out("../data/out/");
+	string rootpath_in("/home/ICT2000/jyang/Documents/Data/MIXAMO/generated_frames_rendered/ir/1280_720/");
+	string rootpath_out("/home/ICT2000/jyang/Documents/Data/MIXAMO/generated_frames_noisy/ir/1280_720/");
+	// string rootpath_in("../data/in/");
+	// string rootpath_out("../data/out/");
 
 	// find all path to depth images
 	std::vector<std::string> paths_relative_depth;
@@ -149,7 +151,6 @@ int main(int argc, char **argv)
 
 	for (auto iter = paths_relative_depth.begin(); iter != paths_relative_depth.end(); iter++)
 	{
-
 		// define filepath for in and out;
 		string filepath_in, filepath_out;
 		filepath_in = rootpath_in + *iter;
@@ -159,7 +160,7 @@ int main(int argc, char **argv)
 		depth_gpu.upload(depth);
 		depth_gpu.convertTo(depth_float_gpu, CV_32FC1, 1 / 65535.f);
 		string ni_1 = "../data/out/ni_1.png";
-		printNormalImage(depth_float_gpu, ni_1);
+		// printNormalImage(depth_float_gpu, ni_1);
 
 		//1.
 		convertDepth2Verts(depth_float_gpu, &vertex_gpu, make_float2(K[0][2], K[1][2]), make_float2(K[0][0], K[1][1]));
@@ -175,18 +176,18 @@ int main(int argc, char **argv)
 		depth_float_gpu.setTo(0.f);
 		convertVerts2Depth(&noisy_vertex_gpu, &depth_float_gpu, make_float2(K[0][2], K[1][2]), make_float2(K[0][0], K[1][1]));
 		string ni_2 = "../data/out/ni_2.png";
-		printNormalImage(depth_float_gpu, ni_2);
+		// printNormalImage(depth_float_gpu, ni_2);
 
 		//2.
 		gaussian_shifts((float2 *)gaussian_2d_shift_gpu.data, gaussian_2d_shift_gpu.cols, gaussian_2d_shift_gpu.rows, 3.f);
 		add_gaussian_shifts(depth_float_gpu, gaussian_2d_shift_gpu, &depth_shifted_gpu);
 		string ni_3 = "../data/out/ni_3.png";
-		printNormalImage(depth_shifted_gpu, ni_3);
+		// printNormalImage(depth_shifted_gpu, ni_3);
 
 		//3.
 		add_depth_noise_barronCVPR2013((float *)depth_shifted_gpu.data, depth_shifted_gpu.cols, depth_shifted_gpu.rows);
 		string ni_4 = "../data/out/ni_4.png";
-		printNormalImage(depth_shifted_gpu, ni_4);
+		// printNormalImage(depth_shifted_gpu, ni_4);
 
 		//convert depth from metre to 1000 mm
 		depth_shifted_gpu.convertTo(depth_gpu, CV_16UC1, 65535.f);
@@ -202,6 +203,10 @@ int main(int argc, char **argv)
 		if (!imwrite(filepath_out.c_str(), depth))
 		{
 			cerr << "cannot write file" << endl;
+		} else {
+			cout << "Finished: " << iter - paths_relative_depth.begin() + 1 << "/" << paths_relative_depth.size()
+				 << "\tProcessing: " << (iter - paths_relative_depth.begin() + 1) * 100.0 / paths_relative_depth.size()
+				 << "%\tSaved at: " << filepath_out << endl;
 		}
 	}
 
