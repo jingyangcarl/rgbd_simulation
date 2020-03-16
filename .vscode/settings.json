@@ -12,7 +12,11 @@
         "numeric": "cpp",
         "random": "cpp",
         "geometry": "cpp",
-        "filesystem": "cpp"
+        "filesystem": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "vector": "cpp"
     },
     "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }
